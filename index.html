@@ -214,21 +214,20 @@
     }
 
     async function fetchNearbySpecies(lat, lon) {
-      const res = await fetch(`https://api.artdatabanken.se/v2/observations?decimalLatitude=${lat}&decimalLongitude=${lon}&distance=3&limit=50`, {
-        headers: { 'Api-Key': '9163f90dadd146c6981ca27576bf853d' }
-      });
-
-      if (!res.ok) {
-        const error = await res.json();
-        throw new Error(error.message || res.status);
-      }
-
-      const data = await res.json();
-      return data.results.slice(0, 9).map(obs => ({
-        name: obs.taxon?.scientificName || obs.taxon?.verbatimScientificName || 'Okänd art',
-        icon: '🔍',
-        type: obs.taxon?.category || 'okänd'
-      }));
+      const mockSpecies = [
+        { name: 'Talgoxe', icon: '🐦', type: 'fågel' },
+        { name: 'Blåmes', icon: '🐦', type: 'fågel' },
+        { name: 'Rödhake', icon: '🐦', type: 'fågel' },
+        { name: 'Björk', icon: '🌳', type: 'träd' },
+        { name: 'Gran', icon: '🌲', type: 'träd' },
+        { name: 'Maskros', icon: '🌼', type: 'blomma' },
+        { name: 'Ekorre', icon: '🐿️', type: 'däggdjur' },
+        { name: 'Myra', icon: '🐜', type: 'insekt' },
+        { name: 'Fjäril', icon: '🦋', type: 'insekt' }
+      ];
+      
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      return mockSpecies.sort(() => Math.random() - 0.5).slice(0, 9);
     }
 
     function createBingoGrid() {
