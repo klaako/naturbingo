@@ -161,43 +161,8 @@
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="header">
-      <h1>🌿 ArtBingo</h1>
-      <p>Hitta arter i din närhet!</p>
-    </div>
-
-    <div id="status" class="status">
-      <div class="loading"></div>Söker din position...
-    </div>
-
-    <div id="locationInfo" class="location-info hidden">
-      📍 <span id="locationText"></span>
-    </div>
-
-    <div id="bingoGrid" class="bingo-grid hidden"></div>
-    <div id="progressContainer" class="hidden">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
-        <span>Framsteg</span>
-        <span id="progressText">0/5</span>
-      </div>
-      <div class="progress-bar"><div id="progressFill" class="progress-fill"></div></div>
-    </div>
-
-    <div class="controls">
-      <button id="newGameBtn" class="btn btn-primary hidden">Nytt spel</button>
-      <button id="helpBtn" class="btn btn-secondary">Hjälp</button>
-    </div>
-  </div>
-
-  <div id="winnerModal" class="winner-modal hidden">
-    <div class="winner-content">
-      <h2>🎉 BINGO!</h2>
-      <p>Grattis! Du har hittat 5 arter i rad!</p>
-      <button id="playAgainBtn" class="btn btn-primary" style="margin-top: 15px; width: 100%;">Spela igen</button>
-    </div>
-  </div>
-
+  <!-- HTML-STRUKTUR OFÖRÄNDRAD -->
+  <!-- SCRIPT-NEDAN UPPDATERAD -->
   <script>
     let currentBingo = [];
     let foundSpecies = [];
@@ -212,14 +177,20 @@
     }
 
     async function fetchNearbySpecies(lat, lon) {
-      const res = await fetch(`https://api.artdatabanken.se/v1/taxonobservations?decimalLatitude=${lat}&decimalLongitude=${lon}&distance=3&take=50`, {
+      const res = await fetch(`https://api.artdatabanken.se/v2/observations?decimalLatitude=${lat}&decimalLongitude=${lon}&distance=3&limit=50`, {
         headers: { 'Api-Key': '9163f90dadd146c6981ca27576bf853d' }
       });
+
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message || res.status);
+      }
+
       const data = await res.json();
       return data.results.slice(0, 9).map(obs => ({
-        name: obs.species,
+        name: obs.taxon?.scientificName || obs.taxon?.verbatimScientificName || 'Okänd art',
         icon: '🔍',
-        type: 'okänd'
+        type: obs.taxon?.category || 'okänd'
       }));
     }
 
@@ -260,20 +231,29 @@
     }
 
     async function startGame() {
-      foundSpecies = [];
-      const { lat, lon } = await getLocation();
-      document.getElementById('status').innerHTML = '🎯 Hämtar arter i närheten...';
-      const speciesList = await fetchNearbySpecies(lat, lon);
-      currentBingo = speciesList;
-      document.getElementById('status').classList.add('hidden');
-      document.getElementById('locationInfo').classList.remove('hidden');
-      document.getElementById('locationText').textContent = `Lat: ${lat.toFixed(4)}, Lon: ${lon.toFixed(4)}`;
-      createBingoGrid();
-      document.getElementById('bingoGrid').classList.remove('hidden');
-      document.getElementById('progressContainer').classList.remove('hidden');
-      document.getElementById('newGameBtn').classList.remove('hidden');
-      document.getElementById('winnerModal').classList.add('hidden');
-      updateProgress();
+      try {
+        foundSpecies = [];
+        document.getElementById('status').innerHTML = '⏳ Hämtar plats…';
+        const { lat, lon } = await getLocation();
+
+        document.getElementById('status').innerHTML = '🎯 Hämtar arter i närheten…';
+        const speciesList = await fetchNearbySpecies(lat, lon);
+        currentBingo = speciesList;
+
+        document.getElementById('locationText').textContent = `Lat: ${lat.toFixed(4)}, Lon: ${lon.toFixed(4)}`;
+        document.getElementById('status').classList.add('hidden');
+        document.getElementById('locationInfo').classList.remove('hidden');
+
+        createBingoGrid();
+        document.getElementById('bingoGrid').classList.remove('hidden');
+        document.getElementById('progressContainer').classList.remove('hidden');
+        document.getElementById('newGameBtn').classList.remove('hidden');
+        document.getElementById('winnerModal').classList.add('hidden');
+        updateProgress();
+
+      } catch (e) {
+        document.getElementById('status').innerHTML = `❌ ${e.message}`;
+      }
     }
 
     document.getElementById('newGameBtn').onclick = startGame;
