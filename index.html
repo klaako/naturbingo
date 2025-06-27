@@ -161,8 +161,45 @@
   </style>
 </head>
 <body>
-  <!-- HTML-STRUKTUR OFÖRÄNDRAD -->
-  <!-- SCRIPT-NEDAN UPPDATERAD -->
+  <div class="container">
+    <div class="header">
+      <h1>🎨 ArtBingo</h1>
+      <p>Hitta arter i din närhet!</p>
+    </div>
+    
+    <div id="status" class="status">
+      <div class="loading"></div>
+      Startar spel...
+    </div>
+    
+    <div id="locationInfo" class="location-info hidden">
+      <div>📍 <span id="locationText"></span></div>
+    </div>
+    
+    <div id="bingoGrid" class="bingo-grid hidden"></div>
+    
+    <div id="progressContainer" class="hidden">
+      <div class="status">
+        Framsteg: <span id="progressText">0/5</span>
+        <div class="progress-bar">
+          <div id="progressFill" class="progress-fill"></div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="controls">
+      <button id="newGameBtn" class="btn btn-primary hidden">Nytt Spel</button>
+      <button id="helpBtn" class="btn btn-secondary">Hjälp</button>
+    </div>
+  </div>
+  
+  <div id="winnerModal" class="winner-modal hidden">
+    <div class="winner-content">
+      <h2>🎉 Grattis!</h2>
+      <p>Du vann ArtBingo!</p>
+      <button id="playAgainBtn" class="btn btn-primary" style="margin-top: 15px;">Spela Igen</button>
+    </div>
+  </div>
   <script>
     let currentBingo = [];
     let foundSpecies = [];
